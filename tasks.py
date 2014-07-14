@@ -7,4 +7,4 @@ celery = Celery(__name__,
 
 @celery.task
 def send_email(frm, to, subject, content):
-    raise "Hey"
+    print "hey."
