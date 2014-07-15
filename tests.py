@@ -30,6 +30,7 @@ class TestAPI(unittest.TestCase):
         assert resp.status_code == 201
         assert resp.headers['Location'] == 'http://test/NOTIMP'
         assert task.call_count == 1
+        assert task.call_args == call(**data)
 
     @patch('tasks.queue_email.delay')
     def test_email_post_fail(self, task):

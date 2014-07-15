@@ -35,7 +35,7 @@ def post_email():
     if not validate_email(data['to_email']):
         return 'Invalid to_email.', 400
 
-    tasks.queue_email.delay(**data)
+    tasks.queue_email.delay(**data.to_dict())
     id = 'NOTIMP'
     return 'Email successfully queued.', 201, {'Location': '/{}'.format(id)}
 
