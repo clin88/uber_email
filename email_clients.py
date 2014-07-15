@@ -27,7 +27,8 @@ class Mailgun(BaseClient):
     domain = os.environ['MAILGUN_DOMAIN']
 
     def __init__(self):
-        self._sess = requests.Session(auth=('api', self.api_key))
+        self._sess = requests.Session()
+        self._sess.auth = ('api', self.api_key)
 
     def ping(self):
         resp = self._sess.get(self.url + '/domains')
