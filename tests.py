@@ -86,6 +86,20 @@ class ClientTests(unittest.TestCase):
         assert post.call_count == 1
         assert resp is True
 
+    @patch('email_clients.requests.post')
+    def test_mandrill_fail(self, post):
+        c = clients.Mandrill()
+        post.side_effect = requests.RequestException
+        nose.tools.assert_raises(clients.RequestError,
+                                 c.send_email,
+                                 'from', 'to', 'subj', 'content')
+
+        post.side_effect = None
+        post.return_value.ok = False
+        nose.tools.assert_raises(clients.EmailClientException,
+                                 c.send_email,
+                                 'from', 'to', 'subj', 'content')
+
     def test_mailgun(self):
         c = clients.Mailgun()
         c._sess = Mock()
@@ -94,6 +108,21 @@ class ClientTests(unittest.TestCase):
 
         assert c._sess.post.call_count == 1
         assert resp is True
+
+    def test_mailgun_fail(self):
+        c = clients.Mailgun()
+        c._sess = Mock()
+
+        c._sess.post.side_effect = requests.RequestException
+        nose.tools.assert_raises(clients.RequestError,
+                                 c.send_email,
+                                 'from', 'to', 'subj', 'content')
+
+        c._sess.post.side_effect = None
+        c._sess.post.return_value.ok = False
+        nose.tools.assert_raises(clients.EmailClientException,
+                                 c.send_email,
+                                 'from', 'to', 'subj', 'content')
 
 ################
 # Test tasks
@@ -108,10 +137,9 @@ class TaskTests(unittest.TestCase):
     def tearDown(self):
         tasks.celery.conf.CELERY_ALWAYS_EAGER = False
 
-    @patch('tasks.QueueEmail.on_success')
     @patch('tasks.queue_email.retry')
     @patch('tasks.clients.get_clients')
-    def test_queue_email(self, client_list, retry, success_hook):
+    def test_queue_email(self, client_list, retry):
         mock_clients = [Mock(), Mock()]
         client_list.return_value = mock_clients
         tasks.queue_email.delay('a', 'b', 'c', 'd').get()
