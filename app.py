@@ -6,6 +6,7 @@
 import flask
 import os
 import tasks
+import re
 
 app = flask.Flask(__name__)
 app.debug = int(os.environ['DEBUG_MODE'])
@@ -26,7 +27,13 @@ def post_email():
     }
     data = flask.request.get_json(force=True)
     if not validate_schema(request_schema, data):
-        flask.abort(400)
+        return 'Wrong parameters.', 400
+
+    if not validate_email(data['from_email']):
+        return 'Invalid from_email.', 400
+
+    if not validate_email(data['to_email']):
+        return 'Invalid to_email.', 400
 
     tasks.queue_email.delay(**data)
     id = 'NOTIMP'
@@ -56,3 +63,11 @@ def validate_schema(schema, data):
 
     return True
 
+def validate_email(email):
+    """Questionable if this is necessary, since this is handled better
+    by our email client services. However, API users probably expect
+    an error when invalid email addresses are entered.
+    """
+    if re.search(r'^[-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]+$', email):
+        return True
+    return False

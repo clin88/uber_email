@@ -5,7 +5,7 @@ import email_clients as clients
 import tasks
 import celery
 import unittest
-from app import app, validate_schema
+from app import app, validate_schema, validate_email
 from mock import patch, Mock, call, MagicMock
 
 ################
@@ -42,18 +42,27 @@ class TestAPI(unittest.TestCase):
 
         assert not task.called
 
-    def test_validate_schema(self):
-        data = {
-            'int': 1,
-            'float': 2.,
-            'str': 'hey'
-        }
-        schema = {
-            'int': int,
-            'float': float,
-            'str': str
-        }
-        assert validate_schema(schema, data) == True
+def test_validate_schema():
+    data = {
+        'int': 1,
+        'float': 2.,
+        'str': 'hey'
+    }
+    schema = {
+        'int': int,
+        'float': float,
+        'str': str
+    }
+    assert validate_schema(schema, data) == True
+
+def test_validate_email():
+    assert validate_email('abc_@test.edu')
+    assert validate_email('def_+annotation@yo.basdif')
+    assert validate_email('hey@test.com')
+    assert not validate_email('abcdef')
+    assert not validate_email('abc@test.')
+    assert not validate_email('@test.com')
+    assert not validate_email('abc@test')
 
 ################
 # Test tasks.
@@ -96,3 +105,4 @@ class TaskTests(unittest.TestCase):
         assert mock_clients[0].send_email.called
         assert mock_clients[1].send_email.called
         assert retry.called
+
