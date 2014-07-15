@@ -1,6 +1,4 @@
-import flask
 import json
-import mock
 import email_clients as clients
 import tasks
 import celery
@@ -9,7 +7,7 @@ from app import app, validate_schema, validate_email
 from mock import patch, Mock, call, MagicMock
 
 ################
-# Test API.
+# Test API
 ################
 
 class TestAPI(unittest.TestCase):
@@ -64,8 +62,41 @@ def test_validate_email():
     assert not validate_email('@test.com')
     assert not validate_email('abc@test')
 
+################################
+# Test email clients
+################################
+
+class ClientTests(unittest.TestCase):
+    def test_get_clients(self):
+        "Ensures get_clients switches up the order."
+        first = clients.get_clients()[:]
+        for _ in range(10):
+            if clients.get_clients() != first:
+                assert True
+                return
+
+        assert False
+
+    @patch('email_clients.requests.post')
+    def test_mandrill(self, post):
+        post.return_value.ok = True
+        c = clients.Mandrill()
+        resp = c.send_email('from', 'to', 'subj', 'content')
+
+        assert post.call_count == 1
+        assert resp is True
+
+    def test_mailgun(self):
+        c = clients.Mailgun()
+        c._sess = Mock()
+        c._sess.post.return_value.ok = True
+        resp = c.send_email('from', 'to', 'subj', 'content')
+
+        assert c._sess.post.call_count == 1
+        assert resp is True
+
 ################
-# Test tasks.
+# Test tasks
 ################
 
 class TaskTests(unittest.TestCase):

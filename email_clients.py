@@ -7,6 +7,25 @@ import random
 class EmailClientException(Exception):
     pass
 
+class RequestError(EmailClientException):
+    pass
+
+class Unauthorized(EmailClientException):
+    pass
+
+class BadRequest(EmailClientException):
+    pass
+
+class PaymentRequired(EmailClientException):
+    pass
+
+class RequestFailed(EmailClientException):
+    pass
+
+class UnknownHTTPError(EmailClientException):
+    pass
+
+
 class BaseClient(object):
     __metaclass__ = abc.ABCMeta
 
@@ -18,7 +37,12 @@ class BaseClient(object):
 
     @abc.abstractmethod
     def send_email(self, frm, to, content, subject):
-        """Sends an email."""
+        """Sends an email. In some cases for all clients, this may just
+        queue the email on their side for later sending."""
+        pass
+
+    def _process_response(self, resp):
+        """Responsible for interpreting response and handling errors."""
         pass
 
 class Mailgun(BaseClient):
@@ -32,19 +56,37 @@ class Mailgun(BaseClient):
 
     def ping(self):
         resp = self._sess.get(self.url + '/domains')
-        return resp.status_code == 200
+        return resp.ok
 
     def send_email(self, frm, to, content, subject):
-        message = json.dumps({
+        message = {
             'from': frm,
             'to': to,
             'subject': subject,
             'text': content
-        })
+        }
         url = '{}/{}/messages'.format(self.url, self.domain)
-        resp = self._sess.post(url, message)
-        #resp.raise_for_status()
-        return resp
+        try:
+            resp = self._sess.post(url, message)
+        except requests.RequestException as e:
+            raise RequestError(e.__class__.__name__, *e.args)
+
+        return self._process_response(resp)
+
+    def _process_response(self, resp):
+        args = resp.status_code, resp.reason, resp.text
+        if resp.ok:
+            return True
+        elif resp.status_code == 400:
+            raise BadRequest(*args)
+        elif resp.status_code == 401:
+            raise Unauthorized(*args)
+        elif resp.status_code == 402:
+            # TODO: Find out how to differentiate 'insufficient quota'.
+            raise RequestFailed(*args)
+        else:
+            raise UnknownHTTPError(*args)
+
 
 class Mandrill(BaseClient):
     url = os.environ['MANDRILL_API_URL']
@@ -52,7 +94,7 @@ class Mandrill(BaseClient):
 
     def ping(self):
         resp = requests.post(self.url + 'users/ping')
-        return resp.json()['PING'] == 'PONG!'
+        return resp.ok
 
     def send_email(self, frm, to, content, subject):
         recipient = { 'email': to }
@@ -67,10 +109,39 @@ class Mandrill(BaseClient):
             'message': message,
         }
         data = json.dumps(data)
-        resp = requests.post(self.url + '/send.json', data=data)
-        #resp.raise_for_status()
-        return resp
+        try:
+            resp = requests.post(self.url + '/messages/send.json', data=data)
+        except requests.RequestException as e:
+            raise EmailClientException(*e.args)
 
+        return self._process_response(resp)
+
+    def _process_response(self, resp):
+        try:
+            data = resp.json()
+        except ValueError:
+            UnknownHTTPError(resp.status_code, resp.reason, resp.text)
+
+        args = resp.status_code, resp.reason, data
+        if resp.ok:
+            return True
+
+        try:
+            error_name = data['name']
+            status = data['status']
+        except KeyError:
+            raise UnknownHTTPError(*args)
+
+        if status != 'error':
+            raise UnknownHTTPError(*args)
+        elif error_name == 'Invalid_Key':
+            raise Unauthorized(*args)
+        elif error_name == 'PaymentRequired':
+            raise PaymentRequired(*args)
+        elif error_name == 'ValidationError':
+            raise BadRequest(*args)
+        else:
+            raise UnknownHTTPError(*args)
 
 _clients = (Mandrill(), Mailgun())
 def get_clients():
