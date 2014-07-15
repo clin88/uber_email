@@ -1,13 +1,11 @@
 # TODO: Add authentication
-# TODO: Support sending multiple emails
+# TODO: Support sending to multiple recipients
 # TODO: Support names
 # TODO: Add logging
 
 import flask
-import json
 import os
 import tasks
-import re
 
 app = flask.Flask(__name__)
 app.debug = int(os.environ['DEBUG_MODE'])
@@ -30,7 +28,8 @@ def post_email():
     if not validate_schema(request_schema, data):
         flask.abort(400)
 
-    result = tasks.send_email.delay(**data)
+    tasks.queue_email.delay(**data)
+    id = 'NOTIMP'
     return 'Email successfully queued.', 201, {'Location': '/{}'.format(id)}
 
 @app.route('/emails/<id>', methods=['GET'])
@@ -56,3 +55,4 @@ def validate_schema(schema, data):
             return False
 
     return True
+
