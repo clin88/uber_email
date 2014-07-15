@@ -38,11 +38,13 @@ class BaseClient(object):
     @abc.abstractmethod
     def send_email(self, frm, to, content, subject):
         """Sends an email. In some cases for all clients, this may just
-        queue the email on their side for later sending."""
+        queue the email on their side for later sending. If successful,
+        returns True or None. If error, raises EmailClientException."""
         pass
 
     def _process_response(self, resp):
-        """Responsible for interpreting response and handling errors."""
+        """Responsible for interpreting response and propagating errors.
+        Should raise EmailClientException in case of error."""
         pass
 
 class Mailgun(BaseClient):

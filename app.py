@@ -7,6 +7,7 @@ import flask
 import os
 import tasks
 import re
+import celery
 
 app = flask.Flask(__name__)
 app.debug = int(os.environ['DEBUG_MODE'])
@@ -31,7 +32,7 @@ def post_email():
     }
     data = flask.request.values
     if not validate_schema(request_schema, data):
-        return 'Wrong parameters.', 400
+        return 'Wrong parameters.' + str(data.to_dict()), 400
 
     if not validate_email(data['from_email']):
         return 'Invalid from_email.', 400
@@ -39,9 +40,17 @@ def post_email():
     if not validate_email(data['to_email']):
         return 'Invalid to_email.', 400
 
-    tasks.queue_email.delay(**data.to_dict())
-    id = 'NOTIMP'
-    return 'Email successfully queued.', 200, {'Location': '/{}'.format(id)}
+    result = tasks.queue_email.delay(**data.to_dict())
+    try:
+        client = result.get(timeout=1)
+    except celery.exceptions.TimeoutError:
+        return 'Email successfully queued.', 200
+    else:
+        return 'Email successfully sent with {}.'.format(client)
+
+    # note: other errors implicitly handled by flask. Use @errorhandler decorator to
+    # customize response.
+
 
 @app.route('/emails/<id>', methods=['GET'])
 def get_email(id):

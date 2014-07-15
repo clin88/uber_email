@@ -6,7 +6,7 @@ import unittest
 import requests
 import nose
 from app import app, validate_schema, validate_email
-from mock import patch, Mock, call, MagicMock
+from mock import patch, Mock, call
 
 ################
 # Test API
@@ -27,8 +27,7 @@ class TestAPI(unittest.TestCase):
         resp = self.app.post('/emails',
                              data=data,
                              base_url='http://test')
-        assert resp.status_code == 201
-        assert resp.headers['Location'] == 'http://test/NOTIMP'
+        assert resp.status_code == 200
         assert task.call_count == 1
         assert task.call_args == call(**data)
 
@@ -71,16 +70,16 @@ def test_validate_email():
 
 class ClientTests(unittest.TestCase):
     def test_get_clients(self):
-        "Ensures get_clients switches up the order."
+        """Ensures get_clients switches up the order."""
         first = clients.get_clients()[:]
-        for _ in range(10):
+        for _ in range(100):
             if clients.get_clients() != first:
                 assert True
                 return
 
         assert False
 
-    @patch('email_clients.requests.post')
+    @patch('email_clients.requests.post', autospec=True)
     def test_mandrill(self, post):
         post.return_value.ok = True
         c = clients.Mandrill()
@@ -89,7 +88,7 @@ class ClientTests(unittest.TestCase):
         assert post.call_count == 1
         assert resp is True
 
-    @patch('email_clients.requests.post')
+    @patch('email_clients.requests.post', autospec=True)
     def test_mandrill_fail(self, post):
         c = clients.Mandrill()
         post.side_effect = requests.RequestException
@@ -110,7 +109,7 @@ class ClientTests(unittest.TestCase):
         resp = c.send_email('from', 'to', 'subj', 'content')
 
         assert c._sess.post.call_count == 1
-        assert resp is True
+        assert resp
 
     def test_mailgun_fail(self):
         c = clients.Mailgun()
@@ -140,8 +139,8 @@ class TaskTests(unittest.TestCase):
     def tearDown(self):
         tasks.celery.conf.CELERY_ALWAYS_EAGER = False
 
-    @patch('tasks.queue_email.retry')
-    @patch('tasks.clients.get_clients')
+    @patch('tasks.queue_email.retry', autospec=True)
+    @patch('tasks.clients.get_clients', autospec=True)
     def test_queue_email(self, client_list, retry):
         mock_clients = [Mock(), Mock()]
         client_list.return_value = mock_clients
@@ -154,12 +153,12 @@ class TaskTests(unittest.TestCase):
         assert not mock_clients[1].called
         assert not retry.called
 
-    @patch('tasks.queue_email.retry')
-    @patch('tasks.clients.get_clients')
+    @patch('tasks.queue_email.retry', autospec=True)
+    @patch('tasks.clients.get_clients', autospec=True)
     def test_queue_email_failure(self, client_list, retry):
         mock_clients = [Mock(), Mock()]
         client_list.return_value = mock_clients
-        mock_clients[0].send_email.return_value = False
+        mock_clients[0].send_email.side_effect = clients.EmailClientException
         mock_clients[1].send_email.side_effect = clients.EmailClientException
         retry.side_effect = celery.exceptions.Retry
 
