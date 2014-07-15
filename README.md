@@ -7,6 +7,7 @@ Features a simple, RESTful, API for sending email. uber-email
 is backed by the Mailgun and Mandrill services, which it rotates
 between when sending emails.
 
+Live at [http://uber-email.chenlin.io/](http://uber-email.chenlin.io/).
 # Author
 
 Chen Lin
@@ -27,6 +28,8 @@ I'm happy to answer questions about them.
 
 # Deployment
 
+To make deployment easier, I recommend using `foreman`.
+
 1.) Install Python dependencies using
 
 `pip install -r requirements.txt`
@@ -44,6 +47,10 @@ MAILGUN_API_URL=https://api.mailgun.net/v2
 MAILGUN_API_KEY=<Mailgun Private API Key>
 MAILGUN_DOMAIN=<Mailgun Sending Domain>
 ```
+
+Or, if you're using `foreman`, save the above as a .env file in the same
+directory as your repository. Foreman will initialize your environment for
+you.
 
 Note that you'll need to create accounts with Mandrill and Mailgun.
 
@@ -132,3 +139,14 @@ Uber-email uses `celery` and `flask`.
     and execution of tasks. While complex, celery also provides some very
     useful features for free, like retry scheduling and serializing tasks.
     This allows developers to focus on business logic and not message passing.
+
+
+# TODO
+
+* It would be trivial to implement scheduling emails, since celery manages this
+  for you.
+* The API should have an adjustable timeout to wait on a task, which can be
+  tweaked to adapt to load. If a task completes within a certain time, we can
+  indicate the result of the operation to the user.
+* We should be storing the results of emails so developers can poll the outcome.
+
