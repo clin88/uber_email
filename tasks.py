@@ -7,7 +7,7 @@ celery = C.Celery(__name__,
                   broker=os.environ['CLOUDAMQP_URL'])
 
 
-@celery.task(bind=True, base=QueueEmail)
+@celery.task(bind=True)
 def queue_email(self, from_email, to_email, subject, content):
     errors = []
     for client in clients.get_clients():
