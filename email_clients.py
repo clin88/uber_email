@@ -112,19 +112,20 @@ class Mandrill(BaseClient):
         try:
             resp = requests.post(self.url + '/messages/send.json', data=data)
         except requests.RequestException as e:
-            raise EmailClientException(*e.args)
+            raise RequestError(*e.args)
 
         return self._process_response(resp)
 
     def _process_response(self, resp):
+        if resp.ok:
+            return True
+
         try:
             data = resp.json()
         except ValueError:
             UnknownHTTPError(resp.status_code, resp.reason, resp.text)
 
         args = resp.status_code, resp.reason, data
-        if resp.ok:
-            return True
 
         try:
             error_name = data['name']

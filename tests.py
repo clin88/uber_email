@@ -3,6 +3,8 @@ import email_clients as clients
 import tasks
 import celery
 import unittest
+import requests
+import nose
 from app import app, validate_schema, validate_email
 from mock import patch, Mock, call, MagicMock
 
@@ -23,7 +25,7 @@ class TestAPI(unittest.TestCase):
            'content': 'yo'
         }
         resp = self.app.post('/emails',
-                             data=json.dumps(data),
+                             data=data,
                              base_url='http://test')
         assert resp.status_code == 201
         assert resp.headers['Location'] == 'http://test/NOTIMP'
@@ -35,7 +37,7 @@ class TestAPI(unittest.TestCase):
         resp = self.app.post('/emails', data=json.dumps(data))
         assert resp.status_code == 400
 
-        resp = self.app.post('/emails', data='NOTJSON')
+        resp = self.app.post('/emails', data='INVALID')
         assert resp.status_code == 400
 
         assert not task.called

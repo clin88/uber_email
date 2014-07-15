@@ -25,7 +25,7 @@ def post_email():
         'subject': basestring,
         'content': basestring
     }
-    data = flask.request.get_json(force=True)
+    data = flask.request.values
     if not validate_schema(request_schema, data):
         return 'Wrong parameters.', 400
 
