@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Uber Emailer</title>
+</head>
+<body>
+  <form action="/emails" method="POST">
+    From: <input type="email" name="from_email"><br>
+    To: <input type="email" name="to_email"><br>
+    Subject: <input type="text" name="subject"><br>
+    Text:<br>
+    <textarea rows="10" cols="50" name="content"></textarea>
+    <br>
+    <input type="submit" value="Send">
+  </form>
+</body>
+</html>

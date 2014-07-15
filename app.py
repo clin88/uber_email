@@ -11,6 +11,10 @@ import re
 app = flask.Flask(__name__)
 app.debug = int(os.environ['DEBUG_MODE'])
 
+@app.route('/', methods=['GET'])
+def home():
+    return flask.render_template('index.html')
+
 @app.route('/emails', methods=['POST'])
 def post_email():
     """Queues a new email, but does not necessarily send the email. Clients
@@ -37,7 +41,7 @@ def post_email():
 
     tasks.queue_email.delay(**data.to_dict())
     id = 'NOTIMP'
-    return 'Email successfully queued.', 201, {'Location': '/{}'.format(id)}
+    return 'Email successfully queued.', 200, {'Location': '/{}'.format(id)}
 
 @app.route('/emails/<id>', methods=['GET'])
 def get_email(id):
