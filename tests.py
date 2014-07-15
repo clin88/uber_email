@@ -144,6 +144,8 @@ class TaskTests(unittest.TestCase):
     def test_queue_email(self, client_list, retry):
         mock_clients = [Mock(), Mock()]
         client_list.return_value = mock_clients
+        mock_clients[0].send_email.return_value = True
+        mock_clients[1].send_email.return_value = True
         tasks.queue_email.delay('a', 'b', 'c', 'd').get()
 
         assert mock_clients[0].send_email.call_count == 1
@@ -156,7 +158,7 @@ class TaskTests(unittest.TestCase):
     def test_queue_email_failure(self, client_list, retry):
         mock_clients = [Mock(), Mock()]
         client_list.return_value = mock_clients
-        mock_clients[0].send_email.return_value = Mock(ok=False)
+        mock_clients[0].send_email.return_value = False
         mock_clients[1].send_email.side_effect = clients.EmailClientException
         retry.side_effect = celery.exceptions.Retry
 

@@ -16,7 +16,7 @@ def queue_email(self, from_email, to_email, subject, content):
         except clients.EmailClientException as e:
             errors.append(e.args)
         else:
-            if resp.ok:
+            if resp:
                 # TODO: Update record to indicate result of operation
                 return client.__class__.__name__, resp
             else:
