@@ -1,17 +1,90 @@
 <!DOCTYPE html>
-<html>
+<!-- This site was created in Webflow. http://www.webflow.com-->
+<!-- Last Published: Tue Jul 15 2014 22:40:11 GMT+0000 (UTC) -->
+<html data-wf-site="53c59d3eb11cbf82651ae99c">
 <head>
-  <title>Uber Emailer</title>
+  <meta charset="utf-8">
+  <title>Uber Email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Webflow">
+  <link rel="stylesheet" type="text/css" href="../static/normalize.css">
+  <link rel="stylesheet" type="text/css" href="../static/webflow.css">
+  <link rel="stylesheet" type="text/css" href="../static/uber-email.webflow.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+  <script>
+    WebFont.load({
+      google: {
+        families: ["Droid Sans:400,700","Droid Serif:400,700"]
+      }
+    });
+  </script>
+  <script type="text/javascript" src="js/modernizr.js"></script>
+  <link rel="shortcut icon" type="image/x-icon" href="https://daks2k3a4ib2z.cloudfront.net/placeholder/favicon.ico">
 </head>
 <body>
-  <form action="/emails" method="POST">
-    From: <input type="email" name="from_email"><br>
-    To: <input type="email" name="to_email"><br>
-    Subject: <input type="text" name="subject"><br>
-    Text:<br>
-    <textarea rows="10" cols="50" name="content"></textarea>
-    <br>
-    <input type="submit" value="Send">
-  </form>
+  <div class="topsection">
+    <div class="w-container">
+      <h1>Uber Emailer</h1>
+      <div class="subtitle">Email as a service as a service, at your service.</div>
+    </div>
+  </div>
+  <div>
+    <div class="w-container">
+      <div class="w-form">
+        <form class="form" id="email-form" name="email-form" data-name="Email Form" method="post" action="/emails">
+          <div class="w-row">
+            <div class="w-col w-col-2 w-col-small-2 w-clearfix formleftcol">
+              <label class="formlabel" for="from_email">From</label>
+            </div>
+            <div class="w-col w-col-10 w-col-small-10">
+              <input class="w-input" id="from_email" type="email" placeholder="Who are you sending as?" name="from_email" data-name="from_name" required="required">
+            </div>
+          </div>
+          <div class="w-row">
+            <div class="w-col w-col-2 w-col-small-2 w-clearfix">
+              <label class="formlabel" for="email">To</label>
+            </div>
+            <div class="w-col w-col-10 w-col-small-10">
+              <input class="w-input" id="to_email" type="email" placeholder="Who are you sending to?" name="to_email" data-name="to_email" required="required">
+            </div>
+          </div>
+          <div class="w-row">
+            <div class="w-col w-col-2 w-col-small-2 w-clearfix">
+              <label class="formlabel">Subject</label>
+            </div>
+            <div class="w-col w-col-10 w-col-small-10">
+              <input class="w-input" id="subject" type="text" placeholder="What&apos;s this about?" name="subject" data-name="subject">
+            </div>
+          </div>
+          <div class="w-row">
+            <div class="w-col w-col-2 w-col-small-2 w-clearfix">
+              <label class="formlabel">Message</label>
+            </div>
+            <div class="w-col w-col-10 w-col-small-10">
+              <textarea class="w-input" id="content" placeholder="What would you like to say?" name="content" data-name="content" data-ix="new-interaction"></textarea>
+              <div class="w-clearfix formsubmitblockmobile">
+                <input class="w-button formsubmit" type="submit" value="Send Email" data-wait="Please wait...">
+              </div>
+            </div>
+          </div>
+          <div class="w-row formsubmitrow">
+            <div class="w-col w-col-2 w-col-small-2 w-col-tiny-2"></div>
+            <div class="w-col w-col-10 w-col-small-10 w-col-tiny-10 w-clearfix">
+              <input class="w-button formsubmit" type="submit" value="Send Email" data-wait="Please wait...">
+            </div>
+          </div>
+        </form>
+        <div class="w-form-done">
+          <p>Thank you! Your submission has been received!</p>
+        </div>
+        <div class="w-form-fail">
+          <p>Oops! Something went wrong while submitting the form :(</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script type="text/javascript" src="js/webflow.js"></script>
+  <!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif]-->
 </body>
 </html>
