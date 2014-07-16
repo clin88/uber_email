@@ -42,7 +42,7 @@ def post_email():
 
     result = tasks.queue_email.delay(**data.to_dict())
     try:
-        client = result.get(timeout=1)
+        client = result.get(timeout=2)
     except celery.exceptions.TimeoutError:
         return 'Email successfully queued.', 200
     else:
