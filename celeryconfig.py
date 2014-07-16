@@ -9,3 +9,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_EVENT_SERIALIZER = 'json'
 
+# deliberately low settings because free addons are free for a reason
+CELERY_TASK_RESULT_EXPIRES = 60
+CELERY_MAX_CACHED_RESULTS = 10
+
