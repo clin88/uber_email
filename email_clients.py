@@ -36,7 +36,7 @@ class BaseClient(object):
         pass
 
     @abc.abstractmethod
-    def send_email(self, frm, to, content, subject):
+    def send_email(self, frm, to, subject, content):
         """Sends an email. In some cases for all clients, this may just
         queue the email on their side for later sending. If successful,
         returns True or None. If error, raises EmailClientException."""
@@ -60,7 +60,7 @@ class Mailgun(BaseClient):
         resp = self._sess.get(self.url + '/domains')
         return resp.ok
 
-    def send_email(self, frm, to, content, subject):
+    def send_email(self, frm, to, subject, content):
         message = {
             'from': frm,
             'to': to,
@@ -98,7 +98,7 @@ class Mandrill(BaseClient):
         resp = requests.post(self.url + 'users/ping')
         return resp.ok
 
-    def send_email(self, frm, to, content, subject):
+    def send_email(self, frm, to, subject, content):
         recipient = { 'email': to }
         message = {
             'from_email': frm,
