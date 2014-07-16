@@ -1,10 +1,7 @@
 import celery as C
 import email_clients as clients
-import os
 
-celery = C.Celery(__name__,
-                  backend='amqp',
-                  broker=os.environ['CLOUDAMQP_URL'])
+celery = C.Celery(__name__, config_source='celeryconfig')
 
 
 @celery.task(bind=True)

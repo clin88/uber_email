@@ -135,9 +135,11 @@ class TaskTests(unittest.TestCase):
         # This ensures that celery tasks are run locally and synchronously
         # for unit testing.
         tasks.celery.conf.CELERY_ALWAYS_EAGER = True
+        tasks.celery.conf.CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
     def tearDown(self):
         tasks.celery.conf.CELERY_ALWAYS_EAGER = False
+        tasks.celery.conf.CELERY_EAGER_PROPAGATES_EXCEPTIONS = False
 
     @patch('tasks.queue_email.retry', autospec=True)
     @patch('tasks.clients.get_clients', autospec=True)
@@ -162,10 +164,9 @@ class TaskTests(unittest.TestCase):
         mock_clients[1].send_email.side_effect = clients.EmailClientException
         retry.side_effect = celery.exceptions.Retry
 
-        result = tasks.queue_email.delay('a', 'b', 'c', 'd')
-        result.get()
-
+        nose.tools.assert_raises(celery.exceptions.Retry,
+                                 tasks.queue_email.delay,
+                                 'a', 'b', 'c', 'd')
         assert mock_clients[0].send_email.called
         assert mock_clients[1].send_email.called
-        assert retry.called
 
