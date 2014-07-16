@@ -39,6 +39,7 @@ To make deployment easier, I recommend using `foreman`.
 ```quote
 DEBUG_MODE=<Flask Debug Mode. 1 for on (not recommended in production), 0 for off>
 CLOUDAMQP_URL=<AMQP service url. Recommend RabbitMQ.>
+REDISCLOUD_URL=<Redis url>
 
 MANDRILL_API_URL=https://mandrillapp.com/api/1.0
 MANDRILL_API_KEY=<Mandrill API Key>
@@ -60,8 +61,9 @@ Note that you'll need to create accounts with Mandrill and Mailgun.
 4.) A `Procfile` is included that details commands for launching application
 processes. You can also use `foreman` to make this easier.
 
-`foreman run web` starts the web server.
-`foreman run worker` starts the celery worker.
+* `foreman run web` starts the web server.
+* 
+* `foreman run worker` starts the celery worker.
 
 This is also very easy to deploy on heroku.
 
@@ -88,9 +90,10 @@ resp = requests.post('http://chenlin.io/emails', data)
 assert resp.status_code == 200
 ```
 
-Note that the response does not indicate if the email was successfully sent-
-it only indicates if the email task was queued successfully. This allows
-long running tasks to run asynchronously with processing of HTTP requests.
+Note that the response sometimes does not indicate if the email was successfully sent-
+it only indicates if the email task was queued successfully. This timeout
+helps prevent long-running requests from blocking the processing of other HTTP
+requests.
 
 # Test
 
