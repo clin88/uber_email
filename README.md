@@ -54,7 +54,10 @@ you.
 
 Note that you'll need to create accounts with Mandrill and Mailgun.
 
-3.) A `Procfile` is included that details commands for launching application
+3.) If you're deploying locally, you'll need to install and run RabbitMQ and Redis,
+ which celery uses as the task queue and the results store, respectively.
+
+4.) A `Procfile` is included that details commands for launching application
 processes. You can also use `foreman` to make this easier.
 
 `foreman run web` starts the web server.
@@ -88,6 +91,13 @@ assert resp.status_code == 200
 Note that the response does not indicate if the email was successfully sent-
 it only indicates if the email task was queued successfully. This allows
 long running tasks to run asynchronously with processing of HTTP requests.
+
+# Test
+
+There's a whole bunch of tests. In the repo directory, run `nosetests`, but
+you'll need to complete setting up your environment first.
+
+If you use `foreman`, use `foreman run nosetests`.
 
 # Architecture and Design
 
@@ -139,7 +149,6 @@ Uber-email uses `celery` and `flask`.
     and execution of tasks. While complex, celery also provides some very
     useful features for free, like retry scheduling and serializing tasks.
     This allows developers to focus on business logic and not message passing.
-
 
 # TODO
 
